@@ -443,15 +443,26 @@
             whatsappModalTitle.textContent = `Enviar Mensaje a ${client.nombre}`;
             whatsappTemplatesList.innerHTML = '';
             messageTemplates.forEach(msg => {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center w-20';
+
                 const button = document.createElement('button');
                 button.className = 'w-16 h-16 text-3xl rounded-full hover:bg-kuma-darker bg-kuma-dark transition-colors send-whatsapp-msg-btn flex items-center justify-center';
+                
                 const emoji = commandEmojis[msg.command] || '💬';
                 button.innerHTML = `<span>${emoji}</span>`;
-                button.title = msg.command; // Tooltip para saber qué hace el emoji
+                
                 button.dataset.phone = client.whatsapp;
                 button.dataset.command = msg.command;
-                button.dataset.client = JSON.stringify(client); 
-                whatsappTemplatesList.appendChild(button);
+                button.dataset.client = JSON.stringify(client);
+
+                const description = document.createElement('p');
+                description.className = 'text-xs mt-2 text-kuma-gray capitalize text-center';
+                description.textContent = msg.command.substring(1); 
+
+                container.appendChild(button);
+                container.appendChild(description);
+                whatsappTemplatesList.appendChild(container);
             });
             whatsappModal.classList.remove('hidden');
         }
