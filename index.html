@@ -121,7 +121,7 @@
                 <input type="hidden" id="client-id">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <input type="text" id="nombre" placeholder="Nombre Cliente" class="bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary" required>
-                    <input type="tel" id="whatsapp" placeholder="WhatsApp (ej: 51987654321)" class="bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary" required>
+                    <input type="tel" id="whatsapp" placeholder="WhatsApp (ej: 987654321)" class="bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary" required>
                 </div>
                 <div class="mb-4">
                     <input type="email" id="correo" placeholder="Correo Cliente" class="w-full bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary" required>
@@ -189,11 +189,37 @@
         </div>
     </div>
 
+    <!-- Modal de Error de Permisos -->
+    <div id="permission-error-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+        <div class="modal-content bg-red-900 border border-red-600 rounded-xl shadow-2xl w-full max-w-2xl p-8 transform">
+            <h2 class="text-2xl font-bold mb-4 text-red-200">¡Acción Requerida! Error de Permisos</h2>
+            <p class="mb-6 text-red-300">Tu aplicación no puede conectarse a la base de datos. Esto es una medida de seguridad de Firebase que debes configurar una sola vez.</p>
+            <p class="mb-4 text-red-300">Para solucionarlo, sigue estos pasos:</p>
+            <ol class="list-decimal list-inside mb-6 text-red-300 space-y-2">
+                <li>Ve a tu proyecto de Firebase y abre <strong class="text-white">Firestore Database</strong>.</li>
+                <li>Haz clic en la pestaña <strong class="text-white">Rules (Reglas)</strong>.</li>
+                <li>Borra todo el contenido y reemplázalo con el siguiente código:</li>
+            </ol>
+            <pre class="bg-kuma-darker text-left p-4 rounded-lg text-sm text-kuma-light whitespace-pre-wrap"><code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /artifacts/{appId}/public/data/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}</code></pre>
+            <div class="flex justify-end mt-8">
+                <button id="close-error-modal-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">Entendido</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Firebase SDK -->
     <script type="module">
         // Importa las funciones que necesitas de los SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
             getFirestore, 
             collection, 
@@ -225,6 +251,7 @@
         // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // Variables de estado
         let clientsUnsubscribe = null;
@@ -233,11 +260,11 @@
         const MAX_MESSAGES = 10;
         
         const defaultMessages = [
-            { command: '/saludo', text: '✨ ¡Hola! ¿Quieres Canva Pro en tu cuenta personal por S/.8 al año? ✨ En Kuma Store te activamos tu cuenta Canva Pro¡con tu mismo correo! 🚀✅ Primero te activamos tu cuenta Pro, ¡luego pagas! 🤝✅ ¡Disfruta de 12 meses de diseño y descargas Pro! 👑 ¡Me comentas si te interesa para empezar! 😉' },
-            { command: '/pasos', text: '¡Perfecto! 👌 El proceso es súper simple y seguro: 1️⃣ Envíanos tu correo personal 📧. 2️⃣ Te enviremos la invitación Pro y te avisaremos 🔔. 3️⃣ Ingresa a tu bandeja de entrada 📥 y haz clic en "Aceptar invitación". 4️⃣ ¡Listo! Ahora entra a Canva y comprueba 👀 que ya tienes todas las funciones premium 👑.' },
-            { command: '/confirmacion', text: '¡Listo, invitación enviada! ✅ Revisa tu bandeja de entrada 📥 para aceptarla. Ojo: Si no ves el correo, ¡no olvides buscar en la carpeta de Spam o Notificaciones! Avísanos cuando lo hayas aceptado. 😉' },
-            { command: '/pago', text: '¡Genial! Me alegra que todo funcione. Puedes realizar el pago de S/.8 a través de [Tu Método de Pago: Yape, Plin, etc.] al número 993886442 opción otros bancos *Agora*. ¡Gracias por tu confianza! 🙏' },
-            { command: '/recordatorio', text: '💪 ¡Hola, [nombre]! Solo un recordatorio de lo increíble que es tu cuenta. 💪 ¡Tienes [dias] DÍAS de Canva Pro activos y listos para la acción! 👑 Tienes un montón de tiempo para explorar cada herramienta y crear diseños espectaculares. ¡A sacarle el máximo provecho! 🔥' }
+            { command: '/saludo', text: '✨ ¡Hola! ¿Quieres *Canva Pro* en tu cuenta personal por S/.8 al año? ✨\n\nEn Kuma Store te activamos tu cuenta Canva Pro ¡con tu mismo correo! 🚀\n\n✅ Primero te activamos tu cuenta Pro, *¡luego pagas!*\n✅ ¡Disfruta de 12 meses de diseño y descargas Pro! 👑\n\n¡Me comentas si te interesa para empezar! 😉' },
+            { command: '/pasos', text: '¡Perfecto! 👌\n\nEl proceso es súper simple y seguro:\n\n1️⃣ Envíanos tu correo personal 📧.\n2️⃣ Te enviaremos la invitación Pro y te avisaremos 🔔.\n3️⃣ Ingresa a tu bandeja de entrada 📥 y haz clic en "Aceptar invitación".\n4️⃣ ¡Listo! Ahora entra a Canva y comprueba 👀 que ya tienes todas las funciones premium 👑.' },
+            { command: '/confirmacion', text: '¡Listo, invitación enviada! ✅\n\nRevisa tu bandeja de entrada 📥 para aceptarla.\n\n*Ojo:* Si no ves el correo, ¡no olvides buscar en la carpeta de *Spam* o *Notificaciones*!\n\nAvísanos cuando lo hayas aceptado. 😉' },
+            { command: '/pago', text: '¡Genial! Me alegra que todo funcione.\n\nPuedes realizar el pago de S/.8 a través de *[Tu Método de Pago: Yape, Plin, etc.]* al número *993886442* opción otros bancos *Agora*.\n\n¡Gracias por tu confianza! 🙏' },
+            { command: '/recordatorio', text: '💪 ¡Hola, [nombre]! Solo un recordatorio de lo increíble que es tu cuenta.\n\n¡Tienes *[dias] DÍAS* de Canva Pro activos y listos para la acción! 👑\n\nTienes un montón de tiempo para explorar cada herramienta y crear diseños espectaculares.\n\n¡A sacarle el máximo provecho! 🔥' }
         ];
 
         // Referencias a elementos del DOM
@@ -260,6 +287,10 @@
         const whatsappModalTitle = document.getElementById('whatsapp-modal-title');
         const whatsappTemplatesList = document.getElementById('whatsapp-templates-list');
         const cancelWhatsappBtn = document.getElementById('cancel-whatsapp-btn');
+
+        const permissionErrorModal = document.getElementById('permission-error-modal');
+        const closeErrorModalBtn = document.getElementById('close-error-modal-btn');
+
 
         // --- Lógica de Firestore ---
         function getCollections() {
@@ -284,6 +315,9 @@
                 }
             } catch (error) {
                 console.error("Error loading messages:", error);
+                if (error.code === 'permission-denied') {
+                    openPermissionErrorModal();
+                }
                 messageTemplates = defaultMessages;
             }
 
@@ -297,19 +331,8 @@
                 updateDashboard();
             }, error => {
                 console.error("Error al obtener clientes:", error);
-                clientList.innerHTML = `
-                    <div class="text-center text-red-400 py-10 px-4 bg-red-900/20 rounded-lg">
-                        <h3 class="font-bold text-lg mb-2 text-red-300">Error de Permisos en la Base de Datos</h3>
-                        <p class="mb-4 text-red-400">No se pueden cargar los datos. Para solucionarlo, ve a tu proyecto de Firebase, sección <strong class="text-white">Firestore Database -> Rules</strong> y reemplaza el contenido con lo siguiente:</p>
-                        <pre class="bg-kuma-darker text-left p-4 rounded-lg text-sm text-kuma-light whitespace-pre-wrap"><code>rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /artifacts/{appId}/public/data/{document=**} {
-      allow read, write: if true;
-    }
-  }
-}</code></pre>
-                    </div>`;
+                clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">Error de conexión. Por favor, revisa los permisos.</p>`;
+                openPermissionErrorModal();
             });
         }
         
@@ -354,6 +377,24 @@ service cloud.firestore {
         });
 
         // --- Lógica de la UI ---
+        function formatPhoneNumberForPeru(phone) {
+            // Remove any non-digit characters
+            let cleaned = ('' + phone).replace(/\D/g, '');
+            
+            // If the number starts with 51 and is 11 digits long (51 + 9 digits), it's correct
+            if (cleaned.startsWith('51') && cleaned.length === 11) {
+                return cleaned;
+            }
+
+            // If the number is 9 digits long, assume it's a Peruvian mobile number and add the country code
+            if (cleaned.length === 9) {
+                return '51' + cleaned;
+            }
+            
+            // Otherwise, return the cleaned number as is (best effort)
+            return cleaned;
+        }
+
         function calculateRemainingDays(expiracion) {
             if (!expiracion) return { text: 'N/A', color: 'gray' };
             const hoy = new Date();
@@ -495,9 +536,19 @@ service cloud.firestore {
             whatsappModal.classList.add('hidden');
         }
 
+        function openPermissionErrorModal() {
+            permissionErrorModal.classList.remove('hidden');
+        }
+
+        function closePermissionErrorModal() {
+            permissionErrorModal.classList.add('hidden');
+        }
+
         addClientBtn.addEventListener('click', () => openClientModal());
         cancelBtn.addEventListener('click', closeClientModal);
         cancelWhatsappBtn.addEventListener('click', closeWhatsappModal);
+        closeErrorModalBtn.addEventListener('click', closePermissionErrorModal);
+
 
         clientList.addEventListener('click', async (e) => {
             const { clientsCol } = getCollections();
@@ -543,9 +594,10 @@ service cloud.firestore {
                 
                 message = message.replace(/\[nombre\]/gi, clientData.nombre);
                 message = message.replace(/\[dias\]/gi, remaining.text.split(' ')[0]);
-
+                
+                const formattedPhone = formatPhoneNumberForPeru(phone);
                 const encodedMessage = encodeURIComponent(message);
-                window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+                window.open(`https://wa.me/${formattedPhone}?text=${encodedMessage}`, '_blank');
                 
                 closeWhatsappModal();
             }
@@ -583,7 +635,7 @@ service cloud.firestore {
                 <div class="p-4 border border-gray-700 rounded-lg">
                     <p class="text-sm font-bold mb-2">Mensaje ${i + 1}</p>
                     <input type="text" data-index="${i}" name="command" placeholder="/comando" value="${msg.command}" class="w-full bg-kuma-darker p-2 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-kuma-secondary">
-                    <textarea data-index="${i}" name="text" placeholder="Texto del mensaje..." rows="3" class="w-full bg-kuma-darker p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-secondary">${msg.text}</textarea>
+                    <textarea data-index="${i}" name="text" placeholder="Texto del mensaje..." rows="4" class="w-full bg-kuma-darker p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-secondary">${msg.text}</textarea>
                 </div>
                 `;
                 messagesForm.insertAdjacentHTML('beforeend', fieldHTML);
@@ -621,8 +673,19 @@ service cloud.firestore {
         cancelMsgsBtn.addEventListener('click', closeMessagesModal);
         saveMsgsBtn.addEventListener('click', saveMessages);
 
-        // Iniciar la carga de datos al cargar la página
-        setupRealtimeListeners();
+        // --- Función Principal de Inicialización ---
+        async function main() {
+            try {
+                await signInAnonymously(auth);
+                console.log("Signed in anonymously.");
+                setupRealtimeListeners();
+            } catch (error) {
+                console.error("Anonymous sign-in failed:", error);
+                clientList.innerHTML = `<p class="text-center text-red-400 py-10">Error de autenticación. No se pudo establecer una sesión anónima.</p>`;
+            }
+        }
+        
+        main();
 
     </script>
 
