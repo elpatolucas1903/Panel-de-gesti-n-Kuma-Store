@@ -49,31 +49,8 @@
 </head>
 <body class="bg-kuma-darker text-kuma-light font-sans">
 
-    <!-- Vista de Login -->
-    <div id="login-view" class="flex items-center justify-center min-h-screen">
-        <div class="text-center p-8 bg-kuma-dark rounded-xl shadow-2xl max-w-sm mx-auto">
-            <div class="w-24 h-24 mx-auto mb-4">
-                <!-- Logo de Kuma Store -->
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-kuma-primary">
-                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
-                    <path d="M12 6C10.9 6 10 6.9 10 8C10 9.1 10.9 10 12 10C13.1 10 14 9.1 14 8C14 6.9 13.1 6 12 6Z" fill="currentColor"/>
-                    <path d="M12 12C9.24 12 7 14.24 7 17C7 17.55 7.45 18 8 18H16C16.55 18 17 17.55 17 17C17 14.24 14.76 12 12 12Z" fill="currentColor"/>
-                </svg>
-            </div>
-            <h1 class="text-2xl font-bold mb-2">Kuma Store CRM</h1>
-            <p class="text-kuma-gray mb-6">Inicia sesión para gestionar tus clientes.</p>
-            <button id="login-btn" class="w-full bg-kuma-primary hover:bg-opacity-80 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300">
-                <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_17_80)"><path d="M47.532 24.5528C47.532 22.9214 47.3998 21.2811 47.1175 19.68H24.252V28.728H37.422C36.842 31.8906 35.171 34.608 32.6455 36.336V42.144H41.516C45.4745 38.4872 47.532 32.1311 47.532 24.5528Z" fill="#4285F4"></path><path d="M24.252 48.0001C30.952 48.0001 36.472 45.8881 40.516 42.144L32.6455 36.336C30.412 37.8481 27.532 38.8801 24.252 38.8801C18.12 38.8801 12.912 35.0881 11.076 29.5681L2.98799 35.544C6.94649 43.4161 14.952 48.0001 24.252 48.0001Z" fill="#34A853"></path><path d="M11.076 29.568C10.116 26.976 10.116 24.024 11.076 21.432L2.988 15.456C-0.347999 21.96 -0.347999 29.04 2.988 35.544L11.076 29.568Z" fill="#FBBC05"></path><path d="M24.252 9.12C28.044 9.12 31.332 10.464 33.876 12.912L40.764 6.024C36.4635 2.29196 30.952 -0.000140686 24.252 -0.000140686C14.952 -0.000140686 6.94649 4.584 2.988 12.456L11.076 18.432C12.912 12.912 18.12 9.12 24.252 9.12Z" fill="#EA4335"></path></g><defs><clipPath id="clip0_17_80"><rect width="48" height="48" fill="white"></rect></clipPath></defs></svg>
-                Ingresar con Google
-            </button>
-            <div id="auth-error" class="hidden mt-4 p-4 bg-red-900 border border-red-500 text-red-300 text-sm rounded-lg text-left">
-                <!-- Error message will be injected here -->
-            </div>
-        </div>
-    </div>
-
     <!-- Vista Principal de la App -->
-    <div id="app-view" class="hidden min-h-screen">
+    <div id="app-view" class="min-h-screen">
         <!-- Header -->
         <header class="bg-kuma-dark p-4 shadow-lg flex justify-between items-center sticky top-0 z-20">
             <div class="flex items-center">
@@ -81,10 +58,6 @@
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-kuma-primary"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/><path d="M12 6C10.9 6 10 6.9 10 8C10 9.1 10.9 10 12 10C13.1 10 14 9.1 14 8C14 6.9 13.1 6 12 6Z" fill="currentColor"/><path d="M12 12C9.24 12 7 14.24 7 17C7 17.55 7.45 18 8 18H16C16.55 18 17 17.55 17 17C17 14.24 14.76 12 12 12Z" fill="currentColor"/></svg>
                 </div>
                 <h1 class="text-xl font-bold">Kuma Store CRM</h1>
-            </div>
-            <div id="user-info" class="flex items-center">
-                <p id="user-display-name" class="text-sm font-medium"></p>
-                <button id="logout-btn" class="ml-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">Salir</button>
             </div>
         </header>
 
@@ -135,7 +108,7 @@
             <!-- Lista de Clientes -->
             <div id="client-list" class="overflow-x-auto">
                 <!-- Clients will be injected here -->
-                <p class="text-center text-kuma-gray py-10">No hay clientes registrados. ¡Añade uno para empezar!</p>
+                <p class="text-center text-kuma-gray py-10">Cargando clientes...</p>
             </div>
         </main>
     </div>
@@ -209,13 +182,6 @@
         // Importa las funciones que necesitas de los SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
-            getAuth, 
-            onAuthStateChanged, 
-            GoogleAuthProvider, 
-            signInWithPopup, 
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
             getFirestore, 
             collection, 
             onSnapshot,
@@ -238,18 +204,16 @@
                 projectId: "panel-de-gestion-kuma-store",
                 storageBucket: "panel-de-gestion-kuma-store.firebasestorage.app",
                 messagingSenderId: "588056077258",
-                appId: "1:588056077258:web:47cfa869fa773a9a2a6533"
+                appId: "1:588056077258:web:47cfa69fa773a9a2a6533"
             };
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'kuma-store-crm-dev';
 
         // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
         // Variables de estado
-        let userId;
         let clientsUnsubscribe = null;
         let localClients = [];
         let messageTemplates = [];
@@ -264,10 +228,6 @@
         ];
 
         // Referencias a elementos del DOM
-        const loginView = document.getElementById('login-view');
-        const appView = document.getElementById('app-view');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
         const addClientBtn = document.getElementById('add-client-btn');
         const clientModal = document.getElementById('client-modal');
         const cancelBtn = document.getElementById('cancel-btn');
@@ -283,62 +243,16 @@
         const saveMsgsBtn = document.getElementById('save-msgs-btn');
         const messagesForm = document.getElementById('messages-form');
 
-
-        // --- Autenticación ---
-        const provider = new GoogleAuthProvider();
-
-        loginBtn.addEventListener('click', () => {
-            signInWithPopup(auth, provider)
-                .catch(error => {
-                    const authErrorDiv = document.getElementById('auth-error');
-                    if (error.code === 'auth/unauthorized-domain') {
-                        authErrorDiv.innerHTML = `<strong>Error: Dominio no autorizado.</strong><br>Ve a tu Consola de Firebase -> Authentication -> Settings -> Authorized domains y añade el dominio desde el cual estás corriendo esta app.`;
-                        authErrorDiv.classList.remove('hidden');
-                    } else {
-                        authErrorDiv.innerHTML = `<strong>Error de Autenticación:</strong><br>${error.message}`;
-                        authErrorDiv.classList.remove('hidden');
-                    }
-                    console.error("Error en el inicio de sesión con Google:", error);
-                });
-        });
-
-        logoutBtn.addEventListener('click', () => {
-            signOut(auth).catch(error => console.error("Error al cerrar sesión:", error));
-        });
-
-        onAuthStateChanged(auth, user => {
-            const userDisplayName = document.getElementById('user-display-name');
-            if (user) {
-                // Usuario ha iniciado sesión
-                userId = user.uid;
-                loginView.classList.add('hidden');
-                appView.classList.remove('hidden');
-                document.getElementById('auth-error').classList.add('hidden');
-                userDisplayName.textContent = user.displayName;
-                setupRealtimeListeners();
-            } else {
-                // Usuario ha cerrado sesión
-                userId = null;
-                loginView.classList.remove('hidden');
-                appView.classList.add('hidden');
-                userDisplayName.textContent = '';
-                if (clientsUnsubscribe) {
-                    clientsUnsubscribe();
-                }
-            }
-        });
-
         // --- Lógica de Firestore ---
         function getCollections() {
-            if (!userId) return {};
+            // Usa una ruta pública para los datos, ya que no hay login
             return {
-                clientsCol: collection(db, 'artifacts', appId, 'users', userId, 'clients'),
-                messagesDoc: doc(db, 'artifacts', appId, 'users', userId, 'config', 'messages')
+                clientsCol: collection(db, 'artifacts', appId, 'public', 'data', 'clients'),
+                messagesDoc: doc(db, 'artifacts', appId, 'public', 'data', 'config', 'messages')
             };
         }
         
         async function setupRealtimeListeners() {
-            if (!userId) return;
             const { clientsCol, messagesDoc } = getCollections();
 
             // Cargar mensajes
@@ -365,16 +279,24 @@
                 updateDashboard();
             }, error => {
                 console.error("Error al obtener clientes:", error);
+                clientList.innerHTML = `
+                    <div class="text-center text-red-400 py-10 px-4 bg-red-900/20 rounded-lg">
+                        <h3 class="font-bold text-lg mb-2 text-red-300">Error de Permisos en la Base de Datos</h3>
+                        <p class="mb-4 text-red-400">No se pueden cargar los datos. Para solucionarlo, ve a tu proyecto de Firebase, sección <strong class="text-white">Firestore Database -> Rules</strong> y reemplaza el contenido con lo siguiente:</p>
+                        <pre class="bg-kuma-darker text-left p-4 rounded-lg text-sm text-kuma-light whitespace-pre-wrap"><code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /artifacts/{appId}/public/data/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}</code></pre>
+                    </div>`;
             });
         }
         
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            if (!userId) {
-                console.error("Error: El usuario no está autenticado. No se puede guardar.");
-                return;
-            }
             
             saveClientBtn.disabled = true;
             saveClientBtn.textContent = 'Guardando...';
@@ -402,9 +324,6 @@
                     // Crear en Firebase
                     await addDoc(clientsCol, { ...clientData, createdAt: serverTimestamp() });
                 }
-                
-                // El listener 'onSnapshot' se encargará de actualizar la UI automáticamente.
-                // No es necesaria una actualización manual aquí.
                 
                 closeClientModal();
 
@@ -438,9 +357,14 @@
                 (client.whatsapp || '').includes(filterText)
             );
 
-            if (filteredClients.length === 0) {
-                clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">No hay clientes registrados o no se encontraron coincidencias.</p>`;
-                return;
+            if (filteredClients.length === 0 && searchInput.value === '') {
+                 clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">No hay clientes registrados. ¡Añade uno para empezar!</p>`;
+                 return;
+            }
+
+            if (filteredClients.length === 0 && searchInput.value !== '') {
+                 clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">No se encontraron coincidencias.</p>`;
+                 return;
             }
             
             const tableHTML = `
@@ -649,6 +573,8 @@
         cancelMsgsBtn.addEventListener('click', closeMessagesModal);
         saveMsgsBtn.addEventListener('click', saveMessages);
 
+        // Iniciar la carga de datos al cargar la página
+        setupRealtimeListeners();
 
     </script>
 
