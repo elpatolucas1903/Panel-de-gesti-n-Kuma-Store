@@ -268,10 +268,10 @@
         const firebaseConfig = typeof __firebase_config !== 'undefined'
             ? JSON.parse(__firebase_config)
             : {
-                apiKey: "YOUR_API_KEY", // Replace with your actual config
+                apiKey: "AIzaSyDFL9fufzIZByi1MhaFTBHCFpiC3hKv4Lw", // Restored fallback API Key from original version
                 authDomain: "panel-de-gesti-n-kuma-store.firebaseapp.com",
                 projectId: "panel-de-gesti-n-kuma-store",
-                storageBucket: "panel-de-gesti-n-kuma-store.appspot.com",
+                storageBucket: "panel-de-gesti-n-kuma-store.firebasestorage.app", // Restored fallback
                 messagingSenderId: "284157387064",
                 appId: "1:284157387064:web:9c600b3e9b05c4cca2e1cd"
               };
@@ -366,7 +366,13 @@
                 updateDashboard();
             }, error => {
                 console.error("Error fetching clients:", error);
-                clientList.innerHTML = `<p class="text-center text-red-400 py-10">Error loading data. Check Firebase configuration.</p>`;
+                let errorMessage = `<strong>Error al cargar los datos.</strong>`;
+                if (error.code === 'permission-denied') {
+                    errorMessage = `<strong>Permiso denegado por Firestore.</strong><br>Asegúrate de que tus reglas de seguridad permitan la lectura de la colección 'clients'.`;
+                } else {
+                    errorMessage += `<br><small class="text-kuma-gray">Verifica la consola para más detalles.</small>`;
+                }
+                clientList.innerHTML = `<div class="text-center text-red-400 py-10">${errorMessage}</div>`;
             });
         }
         
@@ -749,7 +755,20 @@
                 setupRealtimeListeners();
             } catch (error) {
                 console.error("Authentication failed:", error);
-                clientList.innerHTML = `<p class="text-center text-red-400 py-10">Authentication Error. Check Firebase configuration and rules.</p>`;
+                let errorMessage = `<strong>Error de Autenticación.</strong>`;
+                if (error.code) {
+                    switch (error.code) {
+                        case 'auth/invalid-api-key':
+                            errorMessage = `<strong>API Key Inválida.</strong><br>Revisa la configuración de Firebase en el código.`;
+                            break;
+                        case 'auth/operation-not-allowed':
+                            errorMessage = `<strong>Inicio de sesión anónimo no habilitado.</strong><br>Habilita el proveedor de inicio de sesión anónimo en tu consola de Firebase.`;
+                            break;
+                        default:
+                            errorMessage += `<br><small class="text-kuma-gray">Revisa la configuración y reglas de Firebase. Código: ${error.code}</small>`;
+                    }
+                }
+                clientList.innerHTML = `<div class="text-center text-red-400 py-10">${errorMessage}</div>`;
             }
         }
         
