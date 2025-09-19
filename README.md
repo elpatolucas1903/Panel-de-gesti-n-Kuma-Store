@@ -1,1 +1,0 @@
-# Panel-de-gesti-n-Kuma-Store
