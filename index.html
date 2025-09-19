@@ -16,12 +16,12 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        'kuma-primary': '#8B5CF6',
-                        'kuma-secondary': '#A78BFA',
-                        'kuma-dark': '#2E1065',
-                        'kuma-darker': '#1E1B4B',
-                        'kuma-light': '#F5F3FF',
-                        'kuma-gray': '#A0AEC0',
+                        'kuma-primary': '#3B82F6',   // Azul Vibrante
+                        'kuma-secondary': '#60A5FA', // Azul Claro
+                        'kuma-dark': '#1E3A8A',      // Azul Oscuro (elementos)
+                        'kuma-darker': '#0F172A',    // Azul Casi Negro (fondo)
+                        'kuma-light': '#E0E7FF',     // Lavanda Claro (texto)
+                        'kuma-gray': '#94A3B8',      // Gris Pizarra
                     }
                 }
             }
@@ -361,7 +361,7 @@
             const q = query(clientsCol);
             clientsUnsubscribe = onSnapshot(q, (snapshot) => {
                 localClients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderClients();
+                renderClients(searchInput.value.toLowerCase());
                 updateDashboard();
             }, error => {
                 console.error("Error al obtener clientes:", error);
@@ -371,7 +371,6 @@
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Prevenir guardado si el usuario no está autenticado
             if (!userId) {
                 console.error("Error: El usuario no está autenticado. No se puede guardar.");
                 return;
@@ -396,19 +395,21 @@
                 const { clientsCol } = getCollections();
 
                 if (id) {
-                    // Actualizar
+                    // Actualizar en Firebase
                     const clientRef = doc(clientsCol, id);
                     await setDoc(clientRef, { ...clientData, updatedAt: serverTimestamp() }, { merge: true });
                 } else {
-                    // Crear
+                    // Crear en Firebase
                     await addDoc(clientsCol, { ...clientData, createdAt: serverTimestamp() });
                 }
+                
+                // El listener 'onSnapshot' se encargará de actualizar la UI automáticamente.
+                // No es necesaria una actualización manual aquí.
                 
                 closeClientModal();
 
             } catch (error) {
                 console.error("Error guardando cliente:", error);
-                // Opcional: Mostrar un mensaje de error al usuario
             } finally {
                 saveClientBtn.disabled = false;
                 saveClientBtn.textContent = 'Guardar';
@@ -432,13 +433,13 @@
 
         function renderClients(filterText = '') {
             const filteredClients = localClients.filter(client => 
-                client.nombre.toLowerCase().includes(filterText) ||
-                client.correo.toLowerCase().includes(filterText) ||
-                client.whatsapp.includes(filterText)
+                (client.nombre?.toLowerCase() || '').includes(filterText) ||
+                (client.correo?.toLowerCase() || '').includes(filterText) ||
+                (client.whatsapp || '').includes(filterText)
             );
 
             if (filteredClients.length === 0) {
-                clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">No hay clientes registrados. ¡Añade uno para empezar!</p>`;
+                clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">No hay clientes registrados o no se encontraron coincidencias.</p>`;
                 return;
             }
             
@@ -461,7 +462,6 @@
                             let displayStatus = client.estado;
                             let displayStatusColor = statusColors[client.estado] || 'bg-gray-500';
 
-                            // Sobrescribir estado a "Expirado" automáticamente en el panel si la fecha ya pasó
                             if (remaining.text === 'Expirado') {
                                 displayStatus = 'Expirado';
                                 displayStatusColor = statusColors['Expirado'];
@@ -524,7 +524,6 @@
                 document.getElementById('fecha-expiracion').value = client.fechaExpiracion;
                 document.getElementById('producto').value = client.producto;
                 document.getElementById('precio').value = client.precio;
-                // 'estado' is now automatic, so no need to set it from client data
             } else {
                 document.getElementById('modal-title').textContent = 'Añadir Nuevo Cliente';
                 document.getElementById('client-id').value = '';
@@ -543,7 +542,6 @@
 
         clientList.addEventListener('click', async (e) => {
             const { clientsCol } = getCollections();
-            // Botón de editar
             const editButton = e.target.closest('.edit-btn');
             if (editButton) {
                 const id = editButton.dataset.id;
@@ -551,12 +549,9 @@
                 openClientModal(client);
             }
             
-            // Botón de borrar
             const deleteButton = e.target.closest('.delete-btn');
             if (deleteButton) {
                 const id = deleteButton.dataset.id;
-                // Se eliminó la confirmación para evitar problemas en iframes.
-                // Se podría implementar un modal de confirmación personalizado.
                 try {
                     if (clientsCol) {
                         await deleteDoc(doc(clientsCol, id));
@@ -566,7 +561,6 @@
                 }
             }
 
-            // Botón de WhatsApp
             const whatsappButton = e.target.closest('.whatsapp-btn');
             if (whatsappButton) {
                 const phone = whatsappButton.dataset.phone;
@@ -597,7 +591,7 @@
             const headers = "Nombre,WhatsApp,Correo,Producto,Precio,Estado,FechaActivacion,FechaExpiracion";
             const csvContent = "data:text/csv;charset=utf-8," 
                 + headers + "\n"
-                + localClients.map(c => `${c.nombre},${c.whatsapp},${c.correo},${c.producto},${c.precio},${c.estado},${c.fechaActivacion},${c.fechaExpiracion}`).join("\n");
+                + localClients.map(c => `"${c.nombre}","${c.whatsapp}","${c.correo}","${c.producto}",${c.precio},"${c.estado}","${c.fechaActivacion}","${c.fechaExpiracion}"`).join("\n");
             
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
