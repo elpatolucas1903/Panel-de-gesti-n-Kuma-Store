@@ -181,52 +181,14 @@
     <div id="whatsapp-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 p-4">
         <div class="modal-content bg-kuma-dark rounded-xl shadow-2xl w-full max-w-md p-8 transform">
             <h2 id="whatsapp-modal-title" class="text-2xl font-bold mb-6">Enviar Mensaje a...</h2>
-            <div id="whatsapp-templates-list" class="space-y-2 max-h-64 overflow-y-auto">
-                <!-- Templates will be injected here -->
+            <div id="whatsapp-templates-list" class="flex flex-wrap justify-center gap-4">
+                <!-- Emoji buttons will be injected here -->
             </div>
-            <div class="flex justify-end mt-6">
+            <div class="flex justify-end mt-8">
                 <button type="button" id="cancel-whatsapp-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">Cancelar</button>
             </div>
         </div>
     </div>
-    
-    <!-- Modal de Error de Permisos -->
-    <div id="permission-error-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-        <div class="modal-content bg-red-900 border border-red-600 rounded-xl shadow-2xl w-full max-w-2xl p-8 transform">
-            <h2 class="text-2xl font-bold mb-4 text-red-200">¡Acción Requerida! Error de Permisos</h2>
-            <p class="mb-6 text-red-300">Tu aplicación no puede conectarse a la base de datos. Para solucionarlo, asegúrate de haber completado <strong class="text-white">estos dos pasos</strong> en tu consola de Firebase:</p>
-            
-            <div class="mb-6">
-                <h3 class="font-bold text-lg text-red-200 mb-2">Paso 1: Habilitar Autenticación Anónima</h3>
-                <ol class="list-decimal list-inside text-red-300 space-y-1">
-                    <li>En el menú, ve a <strong class="text-white">Authentication</strong>.</li>
-                    <li>Haz clic en la pestaña <strong class="text-white">Sign-in method (Método de inicio de sesión)</strong>.</li>
-                    <li>Busca <strong class="text-white">Anónimo</strong> en la lista, haz clic y actívalo.</li>
-                </ol>
-            </div>
-
-            <div>
-                <h3 class="font-bold text-lg text-red-200 mb-2">Paso 2: Configurar Reglas de Seguridad</h3>
-                <ol class="list-decimal list-inside mb-4 text-red-300 space-y-1">
-                     <li>En el menú, ve a <strong class="text-white">Firestore Database</strong>.</li>
-                    <li>Haz clic en la pestaña <strong class="text-white">Rules (Reglas)</strong>.</li>
-                    <li>Borra todo el contenido y reemplázalo con este código:</li>
-                </ol>
-                <pre class="bg-kuma-darker text-left p-4 rounded-lg text-sm text-kuma-light whitespace-pre-wrap"><code>rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /artifacts/{appId}/public/data/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}</code></pre>
-            </div>
-            <div class="flex justify-end mt-8">
-                <button id="close-error-modal-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">Entendido</button>
-            </div>
-        </div>
-    </div>
-
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -306,9 +268,6 @@ service cloud.firestore {
         const whatsappTemplatesList = document.getElementById('whatsapp-templates-list');
         const cancelWhatsappBtn = document.getElementById('cancel-whatsapp-btn');
         
-        const permissionErrorModal = document.getElementById('permission-error-modal');
-        const closeErrorModalBtn = document.getElementById('close-error-modal-btn');
-
         // --- Lógica de Firestore ---
         function getCollections() {
             return {
@@ -331,9 +290,6 @@ service cloud.firestore {
             } catch (error) {
                 console.error("Error loading messages:", error);
                 messageTemplates = defaultMessages;
-                if (error.code === 'permission-denied') {
-                    openPermissionErrorModal();
-                }
             }
 
             if (clientsUnsubscribe) clientsUnsubscribe();
@@ -345,9 +301,6 @@ service cloud.firestore {
             }, error => {
                 console.error("Error al obtener clientes:", error);
                 clientList.innerHTML = `<p class="text-center text-red-400 py-10">Error al cargar datos. Verifica la configuración de Firebase.</p>`;
-                 if (error.code === 'permission-denied') {
-                    openPermissionErrorModal();
-                }
             });
         }
         
@@ -485,14 +438,16 @@ service cloud.firestore {
         }
 
         function closeClientModal() { clientModal.classList.add('hidden'); }
+
         function openWhatsappModal(client) {
             whatsappModalTitle.textContent = `Enviar Mensaje a ${client.nombre}`;
             whatsappTemplatesList.innerHTML = '';
             messageTemplates.forEach(msg => {
                 const button = document.createElement('button');
-                button.className = 'w-full text-left text-sm p-3 rounded-lg hover:bg-kuma-darker bg-kuma-dark transition-colors send-whatsapp-msg-btn flex items-center gap-3';
+                button.className = 'w-16 h-16 text-3xl rounded-full hover:bg-kuma-darker bg-kuma-dark transition-colors send-whatsapp-msg-btn flex items-center justify-center';
                 const emoji = commandEmojis[msg.command] || '💬';
-                button.innerHTML = `<span class="text-lg">${emoji}</span> <span>${msg.command}</span>`;
+                button.innerHTML = `<span>${emoji}</span>`;
+                button.title = msg.command; // Tooltip para saber qué hace el emoji
                 button.dataset.phone = client.whatsapp;
                 button.dataset.command = msg.command;
                 button.dataset.client = JSON.stringify(client); 
@@ -502,13 +457,10 @@ service cloud.firestore {
         }
 
         function closeWhatsappModal() { whatsappModal.classList.add('hidden'); }
-        function openPermissionErrorModal() { permissionErrorModal.classList.remove('hidden'); }
-        function closePermissionErrorModal() { permissionErrorModal.classList.add('hidden'); }
 
         addClientBtn.addEventListener('click', () => openClientModal());
         cancelBtn.addEventListener('click', closeClientModal);
         cancelWhatsappBtn.addEventListener('click', closeWhatsappModal);
-        closeErrorModalBtn.addEventListener('click', closePermissionErrorModal);
 
         clientList.addEventListener('click', async (e) => {
             const { clientsCol } = getCollections();
@@ -604,9 +556,6 @@ service cloud.firestore {
             } catch (error) {
                 console.error("Anonymous sign-in failed:", error);
                 clientList.innerHTML = `<p class="text-center text-red-400 py-10">Error de autenticación. Verifica la configuración de Firebase.</p>`;
-                if (error.code === 'auth/operation-not-allowed') {
-                    openPermissionErrorModal();
-                }
             }
         }
         
