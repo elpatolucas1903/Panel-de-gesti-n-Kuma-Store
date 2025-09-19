@@ -83,7 +83,7 @@
                 <h1 class="text-xl font-bold">Kuma Store CRM</h1>
             </div>
             <div id="user-info" class="flex items-center">
-                <!-- User info will be injected here -->
+                <p id="user-display-name" class="text-sm font-medium"></p>
                 <button id="logout-btn" class="ml-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">Salir</button>
             </div>
         </header>
@@ -182,7 +182,7 @@
 
                 <div class="flex justify-end gap-4">
                     <button type="button" id="cancel-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">Cancelar</button>
-                    <button type="submit" class="bg-kuma-primary hover:bg-opacity-80 text-white font-bold py-2 px-6 rounded-lg transition-colors">Guardar</button>
+                    <button type="submit" id="save-client-btn" class="bg-kuma-primary hover:bg-opacity-80 text-white font-bold py-2 px-6 rounded-lg transition-colors">Guardar</button>
                 </div>
             </form>
         </div>
@@ -268,7 +268,6 @@
         const appView = document.getElementById('app-view');
         const loginBtn = document.getElementById('login-btn');
         const logoutBtn = document.getElementById('logout-btn');
-        const userInfo = document.getElementById('user-info');
         const addClientBtn = document.getElementById('add-client-btn');
         const clientModal = document.getElementById('client-modal');
         const cancelBtn = document.getElementById('cancel-btn');
@@ -307,19 +306,21 @@
         });
 
         onAuthStateChanged(auth, user => {
+            const userDisplayName = document.getElementById('user-display-name');
             if (user) {
                 // Usuario ha iniciado sesión
                 userId = user.uid;
                 loginView.classList.add('hidden');
                 appView.classList.remove('hidden');
                 document.getElementById('auth-error').classList.add('hidden');
-                userInfo.innerHTML = `<p class="text-sm font-medium">${user.displayName}</p>`;
+                userDisplayName.textContent = user.displayName;
                 setupRealtimeListeners();
             } else {
                 // Usuario ha cerrado sesión
                 userId = null;
                 loginView.classList.remove('hidden');
                 appView.classList.add('hidden');
+                userDisplayName.textContent = '';
                 if (clientsUnsubscribe) {
                     clientsUnsubscribe();
                 }
@@ -367,6 +368,7 @@
         
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const saveButton = document.getElementById('save-client-btn');
             const id = document.getElementById('client-id').value;
             const fechaExpiracionValue = document.getElementById('fecha-expiracion').value;
 
@@ -386,12 +388,14 @@
                 fechaExpiracion: fechaExpiracionValue,
                 producto: document.getElementById('producto').value,
                 precio: parseFloat(document.getElementById('precio').value),
-                estado: estadoDeterminado, // Usar el estado determinado automáticamente
+                estado: estadoDeterminado,
             };
 
             const { clientsCol } = getCollections();
 
             try {
+                saveButton.disabled = true;
+                saveButton.textContent = 'Guardando...';
                 if (id) {
                     // Actualizar
                     const clientRef = doc(clientsCol, id);
@@ -403,6 +407,9 @@
                 closeClientModal();
             } catch (error) {
                 console.error("Error guardando cliente:", error);
+            } finally {
+                saveButton.disabled = false;
+                saveButton.textContent = 'Guardar';
             }
         });
 
