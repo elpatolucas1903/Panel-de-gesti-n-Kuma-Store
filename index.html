@@ -371,28 +371,29 @@
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // Prevenir guardado si el usuario no está autenticado
+            if (!userId) {
+                console.error("Error: El usuario no está autenticado. No se puede guardar.");
+                return;
+            }
+            
             saveClientBtn.disabled = true;
             saveClientBtn.textContent = 'Guardando...';
 
             try {
                 const id = document.getElementById('client-id').value;
-                const fechaExpiracionValue = document.getElementById('fecha-expiracion').value;
-
                 const clientData = {
                     nombre: document.getElementById('nombre').value,
                     whatsapp: document.getElementById('whatsapp').value,
                     correo: document.getElementById('correo').value,
                     fechaActivacion: document.getElementById('fecha-activacion').value,
-                    fechaExpiracion: fechaExpiracionValue,
+                    fechaExpiracion: document.getElementById('fecha-expiracion').value,
                     producto: document.getElementById('producto').value,
                     precio: parseFloat(document.getElementById('precio').value) || 0,
-                    estado: fechaExpiracionValue ? 'Activo' : 'Contactado',
+                    estado: document.getElementById('fecha-expiracion').value ? 'Activo' : 'Contactado',
                 };
 
                 const { clientsCol } = getCollections();
-                if (!clientsCol) {
-                    throw new Error("El usuario no está autenticado o la colección no está disponible.");
-                }
 
                 if (id) {
                     // Actualizar
@@ -437,7 +438,7 @@
             );
 
             if (filteredClients.length === 0) {
-                clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">No se encontraron clientes.</p>`;
+                clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">No hay clientes registrados. ¡Añade uno para empezar!</p>`;
                 return;
             }
             
@@ -557,7 +558,9 @@
                 // Se eliminó la confirmación para evitar problemas en iframes.
                 // Se podría implementar un modal de confirmación personalizado.
                 try {
-                    await deleteDoc(doc(clientsCol, id));
+                    if (clientsCol) {
+                        await deleteDoc(doc(clientsCol, id));
+                    }
                 } catch (error) {
                     console.error("Error eliminando cliente:", error);
                 }
@@ -638,7 +641,9 @@
             messageTemplates = newTemplates;
             const { messagesDoc } = getCollections();
             try {
-                await setDoc(messagesDoc, { templates: messageTemplates });
+                if(messagesDoc) {
+                    await setDoc(messagesDoc, { templates: messageTemplates });
+                }
                 closeMessagesModal();
                 renderClients();
             } catch (error) {
@@ -655,4 +660,5 @@
 
 </body>
 </html>
+
 
