@@ -230,7 +230,14 @@
         // Configuración de Firebase (se inyectará en el entorno de ejecución)
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config)
-            : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" };
+            : {
+                apiKey: "AIzaSyBeYs9RaX7GA79P7uo-MhGuPux-AMyNJeA",
+                authDomain: "panel-de-gestion-kuma-store.firebaseapp.com",
+                projectId: "panel-de-gestion-kuma-store",
+                storageBucket: "panel-de-gestion-kuma-store.firebasestorage.app",
+                messagingSenderId: "588056077258",
+                appId: "1:588056077258:web:47cfa869fa773a9a2a6533"
+            };
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'kuma-store-crm-dev';
 
@@ -617,4 +624,5 @@
 
 </body>
 </html>
+
 
