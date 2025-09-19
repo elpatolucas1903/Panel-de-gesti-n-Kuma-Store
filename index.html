@@ -275,6 +275,7 @@
         const clientList = document.getElementById('client-list');
         const searchInput = document.getElementById('search-input');
         const exportDataBtn = document.getElementById('export-data-btn');
+        const saveClientBtn = document.getElementById('save-client-btn');
 
         const messagesModal = document.getElementById('messages-modal');
         const configMsgsBtn = document.getElementById('config-msgs-btn');
@@ -329,6 +330,7 @@
 
         // --- Lógica de Firestore ---
         function getCollections() {
+            if (!userId) return {};
             return {
                 clientsCol: collection(db, 'artifacts', appId, 'users', userId, 'clients'),
                 messagesDoc: doc(db, 'artifacts', appId, 'users', userId, 'config', 'messages')
@@ -368,34 +370,30 @@
         
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const saveButton = document.getElementById('save-client-btn');
-            const id = document.getElementById('client-id').value;
-            const fechaExpiracionValue = document.getElementById('fecha-expiracion').value;
-
-            // Lógica automática para el estado
-            let estadoDeterminado;
-            if (fechaExpiracionValue) {
-                estadoDeterminado = 'Activo';
-            } else {
-                estadoDeterminado = 'Contactado';
-            }
-
-            const clientData = {
-                nombre: document.getElementById('nombre').value,
-                whatsapp: document.getElementById('whatsapp').value,
-                correo: document.getElementById('correo').value,
-                fechaActivacion: document.getElementById('fecha-activacion').value,
-                fechaExpiracion: fechaExpiracionValue,
-                producto: document.getElementById('producto').value,
-                precio: parseFloat(document.getElementById('precio').value),
-                estado: estadoDeterminado,
-            };
-
-            const { clientsCol } = getCollections();
+            
+            saveClientBtn.disabled = true;
+            saveClientBtn.textContent = 'Guardando...';
 
             try {
-                saveButton.disabled = true;
-                saveButton.textContent = 'Guardando...';
+                const id = document.getElementById('client-id').value;
+                const fechaExpiracionValue = document.getElementById('fecha-expiracion').value;
+
+                const clientData = {
+                    nombre: document.getElementById('nombre').value,
+                    whatsapp: document.getElementById('whatsapp').value,
+                    correo: document.getElementById('correo').value,
+                    fechaActivacion: document.getElementById('fecha-activacion').value,
+                    fechaExpiracion: fechaExpiracionValue,
+                    producto: document.getElementById('producto').value,
+                    precio: parseFloat(document.getElementById('precio').value) || 0,
+                    estado: fechaExpiracionValue ? 'Activo' : 'Contactado',
+                };
+
+                const { clientsCol } = getCollections();
+                if (!clientsCol) {
+                    throw new Error("El usuario no está autenticado o la colección no está disponible.");
+                }
+
                 if (id) {
                     // Actualizar
                     const clientRef = doc(clientsCol, id);
@@ -404,12 +402,15 @@
                     // Crear
                     await addDoc(clientsCol, { ...clientData, createdAt: serverTimestamp() });
                 }
+                
                 closeClientModal();
+
             } catch (error) {
                 console.error("Error guardando cliente:", error);
+                // Opcional: Mostrar un mensaje de error al usuario
             } finally {
-                saveButton.disabled = false;
-                saveButton.textContent = 'Guardar';
+                saveClientBtn.disabled = false;
+                saveClientBtn.textContent = 'Guardar';
             }
         });
 
