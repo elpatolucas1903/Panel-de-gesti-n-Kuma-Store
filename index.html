@@ -163,7 +163,7 @@
                         <input type="date" id="fecha-expiracion" class="w-full bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary">
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                      <select id="producto" class="bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary" required>
                         <option value="Canva Pro Edu">Canva Pro Edu</option>
                         <option value="Chat GPT Pro">Chat GPT Pro</option>
@@ -171,11 +171,13 @@
                         <option value="Gemini Pro">Gemini Pro</option>
                     </select>
                     <input type="number" id="precio" placeholder="Precio (S/.)" class="bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary" required step="0.01">
-                    <select id="estado" class="bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary" required>
-                        <option value="Activo">Activo</option>
-                        <option value="Contactado">Contactado</option>
-                        <option value="Expirado">Expirado</option>
-                    </select>
+                    <div class="hidden">
+                        <select id="estado" class="bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary">
+                            <option value="Activo">Activo</option>
+                            <option value="Contactado">Contactado</option>
+                            <option value="Expirado">Expirado</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-4">
@@ -366,20 +368,26 @@
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('client-id').value;
+            const fechaExpiracionValue = document.getElementById('fecha-expiracion').value;
+
+            // Lógica automática para el estado
+            let estadoDeterminado;
+            if (fechaExpiracionValue) {
+                estadoDeterminado = 'Activo';
+            } else {
+                estadoDeterminado = 'Contactado';
+            }
+
             const clientData = {
                 nombre: document.getElementById('nombre').value,
                 whatsapp: document.getElementById('whatsapp').value,
                 correo: document.getElementById('correo').value,
                 fechaActivacion: document.getElementById('fecha-activacion').value,
-                fechaExpiracion: document.getElementById('fecha-expiracion').value,
+                fechaExpiracion: fechaExpiracionValue,
                 producto: document.getElementById('producto').value,
                 precio: parseFloat(document.getElementById('precio').value),
-                estado: document.getElementById('estado').value,
+                estado: estadoDeterminado, // Usar el estado determinado automáticamente
             };
-
-            if (!clientData.fechaExpiracion) {
-                clientData.estado = 'Contactado';
-            }
 
             const { clientsCol } = getCollections();
 
@@ -441,6 +449,15 @@
                             const remaining = calculateRemainingDays(client.fechaExpiracion);
                             const statusColors = { 'Activo': 'bg-green-500', 'Contactado': 'bg-blue-500', 'Expirado': 'bg-red-500' };
                             
+                            let displayStatus = client.estado;
+                            let displayStatusColor = statusColors[client.estado] || 'bg-gray-500';
+
+                            // Sobrescribir estado a "Expirado" automáticamente en el panel si la fecha ya pasó
+                            if (remaining.text === 'Expirado') {
+                                displayStatus = 'Expirado';
+                                displayStatusColor = statusColors['Expirado'];
+                            }
+                            
                             return `
                             <tr class="border-b bg-kuma-dark border-gray-700 hover:bg-kuma-darker">
                                 <td class="px-6 py-4 font-medium whitespace-nowrap text-white">${client.nombre}</td>
@@ -450,13 +467,13 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="font-semibold">${client.producto}</div>
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full text-white ${statusColors[client.estado] || 'bg-gray-500'}">
-                                        ${client.estado}
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full text-white ${displayStatusColor}">
+                                        ${displayStatus}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="font-medium text-${remaining.color}-400">${remaining.text}</div>
-                                    <div class="text-xs text-gray-400">${new Date(client.fechaExpiracion + 'T00:00:00').toLocaleDateString()}</div>
+                                    <div class="text-xs text-gray-400">${client.fechaExpiracion ? new Date(client.fechaExpiracion + 'T00:00:00').toLocaleDateString() : ''}</div>
                                 </td>
                                 <td class="px-6 py-4 flex items-center gap-2 flex-wrap">
                                     <div class="relative group">
@@ -498,7 +515,7 @@
                 document.getElementById('fecha-expiracion').value = client.fechaExpiracion;
                 document.getElementById('producto').value = client.producto;
                 document.getElementById('precio').value = client.precio;
-                document.getElementById('estado').value = client.estado;
+                // 'estado' is now automatic, so no need to set it from client data
             } else {
                 document.getElementById('modal-title').textContent = 'Añadir Nuevo Cliente';
                 document.getElementById('client-id').value = '';
