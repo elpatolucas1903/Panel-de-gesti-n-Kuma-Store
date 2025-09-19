@@ -165,7 +165,8 @@
     <div id="messages-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-30 p-4">
         <div class="modal-content bg-kuma-dark rounded-xl shadow-2xl w-full max-w-2xl p-8 transform max-h-[90vh] overflow-y-auto">
              <h2 class="text-2xl font-bold mb-2">Configurar Mensajes Automáticos</h2>
-             <p class="text-kuma-gray mb-6">Puedes usar <span class="font-mono text-kuma-secondary bg-kuma-darker px-1 rounded">[nombre]</span> y <span class="font-mono text-kuma-secondary bg-kuma-darker px-1 rounded">[dias]</span> como variables.</p>
+             <p class="text-kuma-gray mb-4">Puedes usar <span class="font-mono text-kuma-secondary bg-kuma-darker px-1 rounded">[nombre]</span> y <span class="font-mono text-kuma-secondary bg-kuma-darker px-1 rounded">[dias]</span> como variables.</p>
+             <p class="text-sm text-kuma-gray mb-6">💡 <strong>Consejo:</strong> Los emojis se mostrarán sin problemas. Para crear un salto de línea, simplemente presiona 'Enter' en el editor de texto.</p>
              <form id="messages-form" class="space-y-4">
                  <!-- Message fields will be injected here -->
              </form>
@@ -188,19 +189,30 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Modal de Error de Permisos -->
     <div id="permission-error-modal" class="modal hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
         <div class="modal-content bg-red-900 border border-red-600 rounded-xl shadow-2xl w-full max-w-2xl p-8 transform">
             <h2 class="text-2xl font-bold mb-4 text-red-200">¡Acción Requerida! Error de Permisos</h2>
-            <p class="mb-6 text-red-300">Tu aplicación no puede conectarse a la base de datos. Este error se debe a las reglas de seguridad de tu proyecto en Firebase.</p>
-            <p class="mb-4 text-red-300">Para solucionarlo, por favor, sigue estos pasos:</p>
-            <ol class="list-decimal list-inside mb-6 text-red-300 space-y-2">
-                <li>Ve a tu proyecto en la <strong class="text-white">Consola de Firebase</strong>.</li>
-                <li>En el menú, ve a <strong class="text-white">Firestore Database</strong> y luego a la pestaña <strong class="text-white">Rules (Reglas)</strong>.</li>
-                <li>Borra todo el contenido actual y reemplázalo con este código:</li>
-            </ol>
-            <pre class="bg-kuma-darker text-left p-4 rounded-lg text-sm text-kuma-light whitespace-pre-wrap"><code>rules_version = '2';
+            <p class="mb-6 text-red-300">Tu aplicación no puede conectarse a la base de datos. Para solucionarlo, asegúrate de haber completado <strong class="text-white">estos dos pasos</strong> en tu consola de Firebase:</p>
+            
+            <div class="mb-6">
+                <h3 class="font-bold text-lg text-red-200 mb-2">Paso 1: Habilitar Autenticación Anónima</h3>
+                <ol class="list-decimal list-inside text-red-300 space-y-1">
+                    <li>En el menú, ve a <strong class="text-white">Authentication</strong>.</li>
+                    <li>Haz clic en la pestaña <strong class="text-white">Sign-in method (Método de inicio de sesión)</strong>.</li>
+                    <li>Busca <strong class="text-white">Anónimo</strong> en la lista, haz clic y actívalo.</li>
+                </ol>
+            </div>
+
+            <div>
+                <h3 class="font-bold text-lg text-red-200 mb-2">Paso 2: Configurar Reglas de Seguridad</h3>
+                <ol class="list-decimal list-inside mb-4 text-red-300 space-y-1">
+                     <li>En el menú, ve a <strong class="text-white">Firestore Database</strong>.</li>
+                    <li>Haz clic en la pestaña <strong class="text-white">Rules (Reglas)</strong>.</li>
+                    <li>Borra todo el contenido y reemplázalo con este código:</li>
+                </ol>
+                <pre class="bg-kuma-darker text-left p-4 rounded-lg text-sm text-kuma-light whitespace-pre-wrap"><code>rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /artifacts/{appId}/public/data/{document=**} {
@@ -208,12 +220,13 @@ service cloud.firestore {
     }
   }
 }</code></pre>
-            <p class="mt-6 text-red-300"><strong>Importante:</strong> Esta regla permite el acceso solo a usuarios que han iniciado sesión (incluyendo la sesión anónima que usa la app). Después de publicar la regla, recarga esta página.</p>
+            </div>
             <div class="flex justify-end mt-8">
                 <button id="close-error-modal-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">Entendido</button>
             </div>
         </div>
     </div>
+
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -230,21 +243,18 @@ service cloud.firestore {
             deleteDoc,
             serverTimestamp,
             query,
-            getDocs,
             getDoc
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // Configuración de Firebase (se inyectará en el entorno de ejecución)
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config)
-            : {
-                apiKey: "AIzaSyBeYs9RaX7GA79P7uo-MhGuPux-AMyNJeA",
-                authDomain: "panel-de-gestion-kuma-store.firebaseapp.com",
-                projectId: "panel-de-gestion-kuma-store",
-                storageBucket: "panel-de-gestion-kuma-store.firebasestorage.app",
-                messagingSenderId: "588056077258",
-                appId: "1:588056077258:web:47cfa869fa773a9a2a6533"
-            };
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFL9fufzIZByi1MhaFTBHCFpiC3hKv4Lw",
+            authDomain: "panel-de-gesti-n-kuma-store.firebaseapp.com",
+            projectId: "panel-de-gesti-n-kuma-store",
+            storageBucket: "panel-de-gesti-n-kuma-store.firebasestorage.app",
+            messagingSenderId: "284157387064",
+            appId: "1:284157387064:web:9c600b3e9b05c4cca2e1cd"
+        };
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'kuma-store-crm-dev';
 
@@ -267,7 +277,6 @@ service cloud.firestore {
             '/recordatorio': '👑'
         };
 
-        // NOTA: Los saltos de línea (\n) y el formato (*negrita*) son compatibles con WhatsApp Web.
         const defaultMessages = [
             { command: '/saludo', text: '✨ ¡Hola! ¿Quieres *Canva Pro* en tu cuenta personal por S/.8 al año? ✨\n\nEn Kuma Store te activamos tu cuenta Canva Pro ¡con tu mismo correo! 🚀\n\n✅ Primero te activamos tu cuenta Pro, *¡luego pagas!*\n✅ ¡Disfruta de 12 meses de diseño y descargas Pro! 👑\n\n¡Me comentas si te interesa para empezar! 😉' },
             { command: '/pasos', text: '¡Perfecto! 👌\n\nEl proceso es súper simple y seguro:\n\n1️⃣ Envíanos tu correo personal 📧.\n2️⃣ Te enviaremos la invitación Pro y te avisaremos 🔔.\n3️⃣ Ingresa a tu bandeja de entrada 📥 y haz clic en "Aceptar invitación".\n4️⃣ ¡Listo! Ahora entra a Canva y comprueba 👀 que ya tienes todas las funciones premium 👑.' },
@@ -296,13 +305,12 @@ service cloud.firestore {
         const whatsappModalTitle = document.getElementById('whatsapp-modal-title');
         const whatsappTemplatesList = document.getElementById('whatsapp-templates-list');
         const cancelWhatsappBtn = document.getElementById('cancel-whatsapp-btn');
-
+        
         const permissionErrorModal = document.getElementById('permission-error-modal');
         const closeErrorModalBtn = document.getElementById('close-error-modal-btn');
 
         // --- Lógica de Firestore ---
         function getCollections() {
-            // Usa una ruta pública para los datos, ya que no hay login
             return {
                 clientsCol: collection(db, 'artifacts', appId, 'public', 'data', 'clients'),
                 messagesDoc: doc(db, 'artifacts', appId, 'public', 'data', 'config', 'messages')
@@ -312,7 +320,6 @@ service cloud.firestore {
         async function setupRealtimeListeners() {
             const { clientsCol, messagesDoc } = getCollections();
 
-            // Cargar mensajes
             try {
                 const docSnap = await getDoc(messagesDoc);
                 if (docSnap.exists() && docSnap.data().templates) {
@@ -329,8 +336,6 @@ service cloud.firestore {
                 }
             }
 
-
-            // Listener para clientes
             if (clientsUnsubscribe) clientsUnsubscribe();
             const q = query(clientsCol);
             clientsUnsubscribe = onSnapshot(q, (snapshot) => {
@@ -339,8 +344,8 @@ service cloud.firestore {
                 updateDashboard();
             }, error => {
                 console.error("Error al obtener clientes:", error);
-                clientList.innerHTML = `<p class="text-center text-red-400 py-10">Error al cargar datos. Revisa la consola para más detalles.</p>`;
-                if (error.code === 'permission-denied') {
+                clientList.innerHTML = `<p class="text-center text-red-400 py-10">Error al cargar datos. Verifica la configuración de Firebase.</p>`;
+                 if (error.code === 'permission-denied') {
                     openPermissionErrorModal();
                 }
             });
@@ -348,10 +353,8 @@ service cloud.firestore {
         
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             saveClientBtn.disabled = true;
             saveClientBtn.textContent = 'Guardando...';
-
             try {
                 const id = document.getElementById('client-id').value;
                 const clientData = {
@@ -364,20 +367,14 @@ service cloud.firestore {
                     precio: parseFloat(document.getElementById('precio').value) || 0,
                     estado: document.getElementById('fecha-expiracion').value ? 'Activo' : 'Contactado',
                 };
-
                 const { clientsCol } = getCollections();
-
                 if (id) {
-                    // Actualizar en Firebase
                     const clientRef = doc(clientsCol, id);
                     await setDoc(clientRef, { ...clientData, updatedAt: serverTimestamp() }, { merge: true });
                 } else {
-                    // Crear en Firebase
                     await addDoc(clientsCol, { ...clientData, createdAt: serverTimestamp() });
                 }
-                
                 closeClientModal();
-
             } catch (error) {
                 console.error("Error guardando cliente:", error);
             } finally {
@@ -388,20 +385,9 @@ service cloud.firestore {
 
         // --- Lógica de la UI ---
         function formatPhoneNumberForPeru(phone) {
-            // Remove any non-digit characters
             let cleaned = ('' + phone).replace(/\D/g, '');
-            
-            // If the number starts with 51 and is 11 digits long (51 + 9 digits), it's correct
-            if (cleaned.startsWith('51') && cleaned.length === 11) {
-                return cleaned;
-            }
-
-            // If the number is 9 digits long, assume it's a Peruvian mobile number and add the country code
-            if (cleaned.length === 9) {
-                return '51' + cleaned;
-            }
-            
-            // Otherwise, return the cleaned number as is (best effort)
+            if (cleaned.startsWith('51') && cleaned.length === 11) { return cleaned; }
+            if (cleaned.length === 9) { return '51' + cleaned; }
             return cleaned;
         }
 
@@ -410,10 +396,8 @@ service cloud.firestore {
             const hoy = new Date();
             const fechaExp = new Date(expiracion + 'T00:00:00');
             hoy.setHours(0, 0, 0, 0);
-            
             const diffTime = fechaExp - hoy;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
             if (diffDays < 0) return { text: 'Expirado', color: 'red' };
             if (diffDays <= 7) return { text: `${diffDays} días`, color: 'yellow' };
             return { text: `${diffDays} días`, color: 'green' };
@@ -425,17 +409,14 @@ service cloud.firestore {
                 (client.correo?.toLowerCase() || '').includes(filterText) ||
                 (client.whatsapp || '').includes(filterText)
             );
-
             if (filteredClients.length === 0 && searchInput.value === '') {
                  clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">No hay clientes registrados. ¡Añade uno para empezar!</p>`;
                  return;
             }
-
             if (filteredClients.length === 0 && searchInput.value !== '') {
                  clientList.innerHTML = `<p class="text-center text-kuma-gray py-10">No se encontraron coincidencias.</p>`;
                  return;
             }
-            
             const tableHTML = `
                 <table class="w-full text-sm text-left text-gray-400">
                     <thead class="text-xs uppercase bg-kuma-dark">
@@ -451,45 +432,27 @@ service cloud.firestore {
                         ${filteredClients.map(client => {
                             const remaining = calculateRemainingDays(client.fechaExpiracion);
                             const statusColors = { 'Activo': 'bg-green-500', 'Contactado': 'bg-blue-500', 'Expirado': 'bg-red-500' };
-                            
                             let displayStatus = client.estado;
                             let displayStatusColor = statusColors[client.estado] || 'bg-gray-500';
-
                             if (remaining.text === 'Expirado') {
                                 displayStatus = 'Expirado';
                                 displayStatusColor = statusColors['Expirado'];
                             }
-                            
                             return `
                             <tr class="border-b bg-kuma-dark border-gray-700 hover:bg-kuma-darker">
                                 <td class="px-6 py-4 font-medium whitespace-nowrap text-white">${client.nombre}</td>
-                                <td class="px-6 py-4">
-                                    <div class="text-xs">${client.correo}</div>
-                                    <div class="text-xs">${client.whatsapp}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="font-semibold">${client.producto}</div>
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full text-white ${displayStatusColor}">
-                                        ${displayStatus}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="font-medium text-${remaining.color}-400">${remaining.text}</div>
-                                    <div class="text-xs text-gray-400">${client.fechaExpiracion ? new Date(client.fechaExpiracion + 'T00:00:00').toLocaleDateString() : ''}</div>
-                                </td>
+                                <td class="px-6 py-4"><div class="text-xs">${client.correo}</div><div class="text-xs">${client.whatsapp}</div></td>
+                                <td class="px-6 py-4"><div class="font-semibold">${client.producto}</div><span class="px-2 py-1 text-xs font-medium rounded-full text-white ${displayStatusColor}">${displayStatus}</span></td>
+                                <td class="px-6 py-4"><div class="font-medium text-${remaining.color}-400">${remaining.text}</div><div class="text-xs text-gray-400">${client.fechaExpiracion ? new Date(client.fechaExpiracion + 'T00:00:00').toLocaleDateString() : ''}</div></td>
                                 <td class="px-6 py-4 flex items-center gap-2 flex-wrap">
-                                    <button class="open-whatsapp-modal-btn bg-green-500 hover:bg-green-600 text-white p-2 rounded-full transition-colors" data-id="${client.id}">
-                                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                    </button>
+                                    <button class="open-whatsapp-modal-btn bg-green-500 hover:bg-green-600 text-white p-2 rounded-full transition-colors" data-id="${client.id}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></button>
                                     <button class="edit-btn bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition-colors" data-id="${client.id}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
                                     <button class="delete-btn bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors" data-id="${client.id}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
                                 </td>
-                            </tr>
-                            `;
+                            </tr>`;
                         }).join('')}
                     </tbody>
-                </table>
-            `;
+                </table>`;
             clientList.innerHTML = tableHTML;
         }
 
@@ -521,119 +484,74 @@ service cloud.firestore {
             clientModal.classList.remove('hidden');
         }
 
-        function closeClientModal() {
-            clientModal.classList.add('hidden');
-        }
-
+        function closeClientModal() { clientModal.classList.add('hidden'); }
         function openWhatsappModal(client) {
             whatsappModalTitle.textContent = `Enviar Mensaje a ${client.nombre}`;
-            whatsappTemplatesList.innerHTML = ''; // Limpiar contenido anterior
-
+            whatsappTemplatesList.innerHTML = '';
             messageTemplates.forEach(msg => {
                 const button = document.createElement('button');
                 button.className = 'w-full text-left text-sm p-3 rounded-lg hover:bg-kuma-darker bg-kuma-dark transition-colors send-whatsapp-msg-btn flex items-center gap-3';
-                
-                const emoji = commandEmojis[msg.command] || '💬'; // Default emoji
-                
+                const emoji = commandEmojis[msg.command] || '💬';
                 button.innerHTML = `<span class="text-lg">${emoji}</span> <span>${msg.command}</span>`;
-                
                 button.dataset.phone = client.whatsapp;
                 button.dataset.command = msg.command;
                 button.dataset.client = JSON.stringify(client); 
                 whatsappTemplatesList.appendChild(button);
             });
-
             whatsappModal.classList.remove('hidden');
         }
 
-        function closeWhatsappModal() {
-            whatsappModal.classList.add('hidden');
-        }
-
-        function openPermissionErrorModal() {
-            permissionErrorModal.classList.remove('hidden');
-        }
-
-        function closePermissionErrorModal() {
-            permissionErrorModal.classList.add('hidden');
-        }
+        function closeWhatsappModal() { whatsappModal.classList.add('hidden'); }
+        function openPermissionErrorModal() { permissionErrorModal.classList.remove('hidden'); }
+        function closePermissionErrorModal() { permissionErrorModal.classList.add('hidden'); }
 
         addClientBtn.addEventListener('click', () => openClientModal());
         cancelBtn.addEventListener('click', closeClientModal);
         cancelWhatsappBtn.addEventListener('click', closeWhatsappModal);
         closeErrorModalBtn.addEventListener('click', closePermissionErrorModal);
 
-
         clientList.addEventListener('click', async (e) => {
             const { clientsCol } = getCollections();
             const editButton = e.target.closest('.edit-btn');
             if (editButton) {
-                const id = editButton.dataset.id;
-                const client = localClients.find(c => c.id === id);
+                const client = localClients.find(c => c.id === editButton.dataset.id);
                 openClientModal(client);
             }
-            
             const deleteButton = e.target.closest('.delete-btn');
             if (deleteButton) {
-                const id = deleteButton.dataset.id;
                 try {
-                    if (clientsCol) {
-                        await deleteDoc(doc(clientsCol, id));
-                    }
-                } catch (error) {
-                    console.error("Error eliminando cliente:", error);
-                }
+                    await deleteDoc(doc(clientsCol, deleteButton.dataset.id));
+                } catch (error) { console.error("Error eliminando cliente:", error); }
             }
-            
             const openWhatsappBtn = e.target.closest('.open-whatsapp-modal-btn');
             if (openWhatsappBtn) {
-                const id = openWhatsappBtn.dataset.id;
-                const client = localClients.find(c => c.id === id);
-                if (client) {
-                    openWhatsappModal(client);
-                }
+                const client = localClients.find(c => c.id === openWhatsappBtn.dataset.id);
+                if (client) openWhatsappModal(client);
             }
         });
         
         whatsappTemplatesList.addEventListener('click', (e) => {
             const sendButton = e.target.closest('.send-whatsapp-msg-btn');
             if (sendButton) {
-                const phone = sendButton.dataset.phone;
-                const command = sendButton.dataset.command;
-                const clientData = JSON.parse(sendButton.dataset.client);
-                
+                const { phone, command, client: clientJson } = sendButton.dataset;
+                const clientData = JSON.parse(clientJson);
                 let message = messageTemplates.find(m => m.command === command)?.text || '';
-                
                 const remaining = calculateRemainingDays(clientData.fechaExpiracion);
-                
-                message = message.replace(/\[nombre\]/gi, clientData.nombre);
-                message = message.replace(/\[dias\]/gi, remaining.text.split(' ')[0]);
-                
+                message = message.replace(/\[nombre\]/gi, clientData.nombre).replace(/\[dias\]/gi, remaining.text.split(' ')[0]);
                 const formattedPhone = formatPhoneNumberForPeru(phone);
-                const encodedMessage = encodeURIComponent(message);
-                window.open(`https://wa.me/${formattedPhone}?text=${encodedMessage}`, '_blank');
-                
+                window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
                 closeWhatsappModal();
             }
         });
         
-        searchInput.addEventListener('input', (e) => {
-            renderClients(e.target.value.toLowerCase());
-        });
+        searchInput.addEventListener('input', (e) => renderClients(e.target.value.toLowerCase()));
 
         exportDataBtn.addEventListener('click', () => {
-             if (localClients.length === 0) {
-                console.log("No hay datos para exportar.");
-                return;
-            }
+             if (localClients.length === 0) { return; }
             const headers = "Nombre,WhatsApp,Correo,Producto,Precio,Estado,FechaActivacion,FechaExpiracion";
-            const csvContent = "data:text/csv;charset=utf-8," 
-                + headers + "\n"
-                + localClients.map(c => `"${c.nombre}","${c.whatsapp}","${c.correo}","${c.producto}",${c.precio},"${c.estado}","${c.fechaActivacion}","${c.fechaExpiracion}"`).join("\n");
-            
-            const encodedUri = encodeURI(csvContent);
+            const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + localClients.map(c => `"${c.nombre}","${c.whatsapp}","${c.correo}","${c.producto}",${c.precio},"${c.estado}","${c.fechaActivacion}","${c.fechaExpiracion}"`).join("\n");
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            link.setAttribute("href", encodeURI(csvContent));
             link.setAttribute("download", `kuma_store_clientes_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
@@ -645,42 +563,32 @@ service cloud.firestore {
             messagesForm.innerHTML = '';
             for (let i = 0; i < MAX_MESSAGES; i++) {
                 const msg = messageTemplates[i] || { command: '', text: '' };
-                const fieldHTML = `
+                messagesForm.insertAdjacentHTML('beforeend', `
                 <div class="p-4 border border-gray-700 rounded-lg">
                     <p class="text-sm font-bold mb-2">Mensaje ${i + 1}</p>
                     <input type="text" data-index="${i}" name="command" placeholder="/comando" value="${msg.command}" class="w-full bg-kuma-darker p-2 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-kuma-secondary">
                     <textarea data-index="${i}" name="text" placeholder="Texto del mensaje..." rows="4" class="w-full bg-kuma-darker p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-secondary">${msg.text}</textarea>
-                </div>
-                `;
-                messagesForm.insertAdjacentHTML('beforeend', fieldHTML);
+                </div>`);
             }
             messagesModal.classList.remove('hidden');
         }
 
-        function closeMessagesModal() {
-            messagesModal.classList.add('hidden');
-        }
+        function closeMessagesModal() { messagesModal.classList.add('hidden'); }
         
         async function saveMessages() {
             const newTemplates = [];
             for (let i = 0; i < MAX_MESSAGES; i++) {
                 const command = messagesForm.querySelector(`input[name="command"][data-index="${i}"]`).value;
                 const text = messagesForm.querySelector(`textarea[name="text"][data-index="${i}"]`).value;
-                if (command && text) {
-                    newTemplates.push({ command, text });
-                }
+                if (command && text) { newTemplates.push({ command, text }); }
             }
             messageTemplates = newTemplates;
             const { messagesDoc } = getCollections();
             try {
-                if(messagesDoc) {
-                    await setDoc(messagesDoc, { templates: messageTemplates });
-                }
+                await setDoc(messagesDoc, { templates: messageTemplates });
                 closeMessagesModal();
                 renderClients();
-            } catch (error) {
-                console.error("Error saving messages:", error);
-            }
+            } catch (error) { console.error("Error saving messages:", error); }
         }
         
         configMsgsBtn.addEventListener('click', openMessagesModal);
@@ -695,7 +603,10 @@ service cloud.firestore {
                 setupRealtimeListeners();
             } catch (error) {
                 console.error("Anonymous sign-in failed:", error);
-                clientList.innerHTML = `<p class="text-center text-red-400 py-10">Error de autenticación. No se pudo establecer una sesión anónima.</p>`;
+                clientList.innerHTML = `<p class="text-center text-red-400 py-10">Error de autenticación. Verifica la configuración de Firebase.</p>`;
+                if (error.code === 'auth/operation-not-allowed') {
+                    openPermissionErrorModal();
+                }
             }
         }
         
