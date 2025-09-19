@@ -160,7 +160,7 @@
                     </div>
                     <div>
                         <label class="text-sm text-kuma-gray">Fecha Expiración</label>
-                        <input type="date" id="fecha-expiracion" class="w-full bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary" required>
+                        <input type="date" id="fecha-expiracion" class="w-full bg-kuma-darker p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-kuma-primary">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -377,6 +377,10 @@
                 estado: document.getElementById('estado').value,
             };
 
+            if (!clientData.fechaExpiracion) {
+                clientData.estado = 'Contactado';
+            }
+
             const { clientsCol } = getCollections();
 
             try {
@@ -498,6 +502,8 @@
             } else {
                 document.getElementById('modal-title').textContent = 'Añadir Nuevo Cliente';
                 document.getElementById('client-id').value = '';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('fecha-activacion').value = today;
             }
             clientModal.classList.remove('hidden');
         }
@@ -624,5 +630,4 @@
 
 </body>
 </html>
-
 
