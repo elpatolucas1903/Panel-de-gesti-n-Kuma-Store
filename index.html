@@ -57,6 +57,24 @@
             border-radius: 10px;
             border: 2px solid #1E1B4B;
         }
+        /* Sorting styles */
+        .sortable {
+            cursor: pointer;
+            position: relative;
+        }
+        .sort-icon {
+            display: inline-block;
+            margin-left: 8px;
+            opacity: 0.5;
+            transition: opacity 0.2s ease;
+        }
+        .sortable:hover .sort-icon {
+            opacity: 1;
+        }
+        .sort-icon.active {
+            opacity: 1;
+            color: #A78BFA; /* kuma-secondary */
+        }
     </style>
 </head>
 <body class="bg-kuma-darker text-kuma-light font-sans">
@@ -270,6 +288,8 @@
         let localClients = [];
         let messageTemplates = [];
         let clientIdToDelete = null;
+        let sortColumn = 'createdAt';
+        let sortDirection = 'desc';
         const MAX_MESSAGES = 10;
         
         const commandEmojis = {
@@ -391,23 +411,48 @@
         }
 
         function calculateRemainingDays(expiracion) {
-            if (!expiracion) return { text: 'N/A', color: 'gray' };
+            if (!expiracion) return { text: 'N/A', color: 'gray', days: Infinity };
             const hoy = new Date();
             const fechaExp = new Date(expiracion + 'T00:00:00');
             hoy.setHours(0, 0, 0, 0);
             const diffTime = fechaExp - hoy;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (diffDays < 0) return { text: 'Expirado', color: 'red' };
-            if (diffDays <= 7) return { text: `${diffDays} días`, color: 'yellow' };
-            return { text: `${diffDays} días`, color: 'green' };
+             if (diffDays < 0) return { text: 'Expirado', color: 'red', days: -1 };
+            if (diffDays <= 7) return { text: `${diffDays} días`, color: 'yellow', days: diffDays };
+            return { text: `${diffDays} días`, color: 'green', days: diffDays };
         }
 
         function renderClients(filterText = '') {
-            const sortedClients = [...localClients].sort((a, b) => {
-                 const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : 0;
-                 const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : 0;
-                 return dateB - dateA; // Sort descending
+            let sortedClients = [...localClients];
+
+            // Sorting logic
+            sortedClients.sort((a, b) => {
+                let valA, valB;
+
+                switch (sortColumn) {
+                    case 'nombre':
+                        valA = a.nombre?.toLowerCase() || '';
+                        valB = b.nombre?.toLowerCase() || '';
+                        return valA.localeCompare(valB);
+                    case 'producto':
+                        valA = a.producto?.toLowerCase() || '';
+                        valB = b.producto?.toLowerCase() || '';
+                        return valA.localeCompare(valB);
+                    case 'expiracion':
+                         valA = calculateRemainingDays(a.fechaExpiracion).days;
+                         valB = calculateRemainingDays(b.fechaExpiracion).days;
+                         return valA - valB;
+                    case 'createdAt':
+                    default:
+                        valA = a.createdAt?.toDate ? a.createdAt.toDate() : 0;
+                        valB = b.createdAt?.toDate ? b.createdAt.toDate() : 0;
+                        return valA - valB;
+                }
             });
+
+            if (sortDirection === 'desc') {
+                sortedClients.reverse();
+            }
 
             const filteredClients = sortedClients.filter(client => 
                 (client.nombre?.toLowerCase() || '').includes(filterText) ||
@@ -420,14 +465,21 @@
                  return;
             }
             
+            const getSortIcon = (column) => {
+                if (column !== sortColumn) return `<span class="sort-icon">⇅</span>`;
+                return sortDirection === 'asc' 
+                    ? `<span class="sort-icon active">↑</span>` 
+                    : `<span class="sort-icon active">↓</span>`;
+            };
+            
             const tableHTML = `
                 <table class="w-full text-sm text-left text-gray-400">
                     <thead class="text-xs uppercase bg-kuma-dark">
                         <tr>
-                            <th scope="col" class="px-6 py-3">Cliente</th>
+                            <th scope="col" class="px-6 py-3 sortable" data-sort="nombre">Cliente ${getSortIcon('nombre')}</th>
                             <th scope="col" class="px-6 py-3">Contacto</th>
-                            <th scope="col" class="px-6 py-3">Producto/Estado</th>
-                            <th scope="col" class="px-6 py-3">Expiración</th>
+                            <th scope="col" class="px-6 py-3 sortable" data-sort="producto">Producto/Estado ${getSortIcon('producto')}</th>
+                            <th scope="col" class="px-6 py-3 sortable" data-sort="expiracion">Expiración ${getSortIcon('expiracion')}</th>
                             <th scope="col" class="px-6 py-3">Acciones</th>
                         </tr>
                     </thead>
@@ -589,6 +641,19 @@
         });
 
         clientList.addEventListener('click', (e) => {
+            const sortableHeader = e.target.closest('.sortable');
+            if (sortableHeader) {
+                const newSortColumn = sortableHeader.dataset.sort;
+                if (newSortColumn === sortColumn) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortColumn = newSortColumn;
+                    sortDirection = 'asc';
+                }
+                renderClients(searchInput.value.toLowerCase());
+                return; // Prevent other actions
+            }
+
             const editButton = e.target.closest('.edit-btn');
             if (editButton) {
                 const client = localClients.find(c => c.id === editButton.dataset.id);
